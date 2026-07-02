@@ -100,8 +100,8 @@
   <div class="toolbar">
     <div class="hint"><b>Drag a pill</b> to move it · <b>drag its left/right edge</b> to stretch or shrink · milestones (✦ ◆ ★) drag too. Then hit <b>Save</b>.</div>
     <span id="status">no changes</span>
+    <button class="btn ghost" id="undoBtn">↶ Undo</button>
     <button class="btn ghost" id="relinkBtn" title="Re-snap each compliance→mfg→photo→launch chain to its packaging-design date">Re-link chains</button>
-    <button class="btn ghost" id="resetBtn">Reset</button>
     <button class="btn primary" id="saveBtn">Save &amp; copy link</button>
   </div>
 
@@ -125,7 +125,7 @@
   <div class="ganttScroll"><div class="gantt" id="gantt"></div></div>
 
   <div class="note">
-    <b>How this works:</b> everything you see is a draggable pill. Move a bar or drag its edges to reshape any phase, then <b>Save &amp; copy link</b> — your layout is stored in this browser <i>and</i> baked into the page URL, which is copied to your clipboard. Send that URL to Cindy and she sees exactly your adjusted timeline (no re-publish needed). <b>Reset</b> restores the original plan. <b>Re-link chains</b> re-snaps each brand's compliance (60d) → manufacturing (30d) → photoshoot (3wk) → web-impl (2wk) → ★ launch sequence to wherever you dragged its packaging-design bar.
+    <b>How this works:</b> everything you see is a draggable pill. Move a bar or drag its edges to reshape any phase, then <b>Save &amp; copy link</b> — your layout is stored permanently in this browser <i>and</i> baked into the page URL, which is copied to your clipboard. Send that URL to Cindy and she sees exactly your adjusted timeline (no re-publish needed). <b>↶ Undo</b> steps back through your changes one at a time (keep tapping to walk all the way back to the original). <b>Re-link chains</b> re-snaps each brand's compliance (60d) → manufacturing (30d) → photoshoot (3wk) → web-impl (2wk) → ★ launch sequence to wherever you dragged its packaging-design bar.
   </div>
   <div class="foot">Generated for Sean / Curador · re-anchored to Headchange workshop Jun 24, 2026</div>
 </div>
@@ -284,7 +284,7 @@ const readout=document.getElementById('readout');
 function drag(el,it,mode){
   el.addEventListener('pointerdown',e=>{
     e.preventDefault();e.stopPropagation();el.setPointerCapture(e.pointerId);
-    const x0=e.clientX,s0=it.s,e0=it.e,d0=it.d;
+    const x0=e.clientX,s0=it.s,e0=it.e,d0=it.d,pre=snapshot();
     function mv(ev){
       const dd=Math.round((ev.clientX-x0)/PXDAY);
       if(mode==='move'){const w=e0-s0;let ns=Math.max(0,Math.min(s0+dd,totalDays-w));it.s=ns;it.e=ns+w;}
@@ -295,7 +295,7 @@ function drag(el,it,mode){
       readout.style.display='block';readout.style.left=(ev.clientX+14)+'px';readout.style.top=(ev.clientY+16)+'px';
       readout.textContent=it.type==='bar'?`${fmtDay(it.s)} – ${fmtDay(it.e)}  (${it.e-it.s}d)`:fmtDay(it.d);
     }
-    function up(){document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);readout.style.display='none';markDirty();updateSummary();}
+    function up(){document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);readout.style.display='none';if(snapshot()!==pre)pushUndo(pre);markDirty();updateSummary();}
     document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);
   });
 }
@@ -327,6 +327,20 @@ function markClean(msg){clean=true;statusEl.textContent=msg||'saved';statusEl.cl
 if(!clean)statusEl.textContent='loaded from link';
 function currentState(){const s={b:{},m:{}};allItems.forEach(it=>{if(it.type==='bar')s.b[it.id]=[it.s,it.e];else s.m[it.id]=it.d;});return s;}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.className='show';setTimeout(()=>t.className='',2200);}
+
+// ---- undo history (in-session) ----
+const undoStack=[],undoBtn=document.getElementById('undoBtn');
+function snapshot(){return JSON.stringify(currentState());}
+function relayoutAll(){allItems.forEach(layoutItem);}
+function updateUndoBtn(){undoBtn.disabled=!undoStack.length;undoBtn.style.opacity=undoStack.length?'1':'.4';undoBtn.textContent=undoStack.length?`↶ Undo (${undoStack.length})`:'↶ Undo';}
+function pushUndo(pre){undoStack.push(pre);if(undoStack.length>200)undoStack.shift();updateUndoBtn();}
+updateUndoBtn();
+undoBtn.addEventListener('click',()=>{
+  if(!undoStack.length)return;
+  applyState(JSON.parse(undoStack.pop()));
+  relayoutAll();updateSummary();updateUndoBtn();markDirty();
+  toast(undoStack.length?'Undid — keep tapping to step back':'Back to the last saved / original state');
+});
 document.getElementById('saveBtn').addEventListener('click',()=>{
   const st=currentState();localStorage.setItem(LSKEY,JSON.stringify(st));
   const enc=btoa(unescape(encodeURIComponent(JSON.stringify(st))));
@@ -335,11 +349,8 @@ document.getElementById('saveBtn').addEventListener('click',()=>{
   else toast('Saved (copy the URL to share)');
   markClean('saved ✓');
 });
-document.getElementById('resetBtn').addEventListener('click',()=>{
-  if(!confirm('Reset to the original timeline? This clears your saved edits.'))return;
-  localStorage.removeItem(LSKEY);history.replaceState(null,'',location.pathname);location.reload();
-});
 document.getElementById('relinkBtn').addEventListener('click',()=>{
+  const pre=snapshot();
   Object.values(brandRefs).forEach(b=>{
     const base=b.pkgBar.e;
     b.compBar.s=base;b.compBar.e=base+60;
@@ -349,6 +360,7 @@ document.getElementById('relinkBtn').addEventListener('click',()=>{
     b.launchMs.d=b.implBar.e;
     [b.compBar,b.mfgBar,b.photoBar,b.implBar,b.launchMs].forEach(layoutItem);
   });
+  if(snapshot()!==pre)pushUndo(pre);
   markDirty();updateSummary();toast('Chains re-linked to packaging dates');
 });
 </script>
