@@ -3,386 +3,354 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Curador Brands — Studio Linear Gantt</title>
+<title>Curador Brands — Studio Linear Gantt (editable)</title>
 <style>
   :root{
-    --red:#ED0006;
-    --ink:#141414;
-    --muted:#6b6b6b;
-    --grid:#ececec;
-    --grid2:#f6f6f6;
-    --row:#ffffff;
-    --rowAlt:#fcfcfc;
-    /* workstream colors (match PDF link hues) */
-    --strategy:#b14fd8;
-    --visual:#1a9bce;
-    --photo:#e8821e;
-    --website:#2b2bb0;
-    --packaging:#13a39a;
-    --instore:#5b5bd6;
-    --social:#1d9e5e;
-    --bxd:#0f9bbf;
-    /* added real-world chain */
-    --chain:#ED0006;
-    --chainSoft:#ffd9da;
+    --red:#ED0006;--ink:#141414;--muted:#6b6b6b;--grid:#ececec;--grid2:#f4f4f4;--rowAlt:#fcfcfc;
+    --strategy:#b14fd8;--visual:#1a9bce;--photo:#e8821e;--website:#2b2bb0;--packaging:#13a39a;
+    --instore:#5b5bd6;--social:#1d9e5e;--bxd:#0f9bbf;--chain:#ED0006;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
-  body{
-    font-family:"SFMono-Regular",ui-monospace,"Roboto Mono",Menlo,Consolas,monospace;
-    color:var(--ink);
-    background:#fff;
-    -webkit-font-smoothing:antialiased;
-  }
-  .topbar{
-    background:var(--red);
-    color:#fff;
-    padding:22px 26px 20px;
-  }
-  .topbar h1{
-    margin:0;
-    font-size:26px;
-    letter-spacing:6px;
-    font-weight:700;
-  }
-  .topbar p{
-    margin:8px 0 0;
-    font-size:12px;
-    letter-spacing:1px;
-    opacity:.9;
-  }
-  .wrap{padding:22px 26px 60px;}
+  body{font-family:"SFMono-Regular",ui-monospace,"Roboto Mono",Menlo,Consolas,monospace;color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;}
+  .topbar{background:var(--red);color:#fff;padding:20px 26px 18px;}
+  .topbar h1{margin:0;font-size:24px;letter-spacing:5px;font-weight:700;}
+  .topbar p{margin:8px 0 0;font-size:11px;letter-spacing:1px;opacity:.92;}
+  .wrap{padding:18px 26px 70px;}
 
-  /* summary cards */
-  .summary{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:14px;
-    margin-bottom:26px;
-  }
-  .card{
-    border:1px solid var(--grid);
-    border-radius:12px;
-    padding:16px 18px;
-    background:#fff;
-  }
-  .card h3{margin:0 0 12px;font-size:13px;letter-spacing:2px;color:var(--red);}
-  .card .line{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;padding:5px 0;border-bottom:1px dashed var(--grid);}
+  /* toolbar */
+  .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:16px;padding:12px 14px;border:1px solid var(--grid);border-radius:12px;background:#fafafa;}
+  .toolbar .hint{font-size:11px;color:var(--muted);flex:1;min-width:200px;line-height:1.5;}
+  .btn{font-family:inherit;font-size:11px;letter-spacing:.5px;border:1px solid var(--ink);background:#fff;color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:700;}
+  .btn:hover{background:var(--ink);color:#fff;}
+  .btn.primary{background:var(--red);border-color:var(--red);color:#fff;}
+  .btn.primary:hover{background:#c40005;}
+  .btn.ghost{border-color:var(--grid);color:var(--muted);font-weight:400;}
+  .btn.ghost:hover{background:#eee;color:var(--ink);}
+  #status{font-size:10px;letter-spacing:1px;color:var(--muted);}
+  #status.unsaved{color:var(--red);font-weight:700;}
+
+  .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+  .card{border:1px solid var(--grid);border-radius:12px;padding:14px 16px;}
+  .card h3{margin:0 0 10px;font-size:12px;letter-spacing:2px;color:var(--red);}
+  .card .line{display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:4px 0;border-bottom:1px dashed var(--grid);}
   .card .line:last-child{border-bottom:none;}
   .card .line span:first-child{color:var(--muted);}
   .card .real{color:var(--chain);font-weight:700;}
 
-  /* legend */
-  .legend{display:flex;flex-wrap:wrap;gap:14px 20px;margin-bottom:18px;font-size:11px;align-items:center;}
+  .legend{display:flex;flex-wrap:wrap;gap:12px 18px;margin-bottom:14px;font-size:10.5px;align-items:center;}
   .legend .item{display:flex;align-items:center;gap:6px;}
-  .swatch{width:16px;height:11px;border-radius:3px;display:inline-block;}
-  .swatch.chain{background:var(--chain);}
-  .dia{color:#e8821e;font-size:14px;}
-  .star{color:var(--chain);font-size:14px;}
+  .swatch{width:15px;height:11px;border-radius:3px;display:inline-block;}
+  .swatch.chain{background:repeating-linear-gradient(45deg,var(--chain),var(--chain) 4px,#c40005 4px,#c40005 8px);}
+  .dia{color:#e8821e;font-size:13px;}.star{color:var(--chain);font-size:13px;}
 
-  /* gantt */
-  .ganttScroll{
-    overflow-x:auto;
-    border:1px solid var(--grid);
-    border-radius:12px;
-  }
+  .ganttScroll{overflow-x:auto;border:1px solid var(--grid);border-radius:12px;}
   .gantt{position:relative;}
-  .labelcol{width:230px;}
-  /* header */
+  .labelcol{width:210px;flex:none;}
   .ghead{display:flex;position:sticky;top:0;z-index:6;background:#fff;border-bottom:1px solid var(--grid);}
-  .ghead .labelcol{position:sticky;left:0;z-index:7;background:#fff;border-right:1px solid var(--grid);display:flex;align-items:flex-end;padding:8px 12px;font-size:10px;letter-spacing:1px;color:var(--muted);}
-  .timehead{position:relative;}
-  .month{position:absolute;top:0;height:22px;border-left:1px solid var(--grid);font-size:10px;letter-spacing:1px;color:var(--ink);padding:5px 0 0 6px;font-weight:700;overflow:hidden;white-space:nowrap;}
-  .wtick{position:absolute;top:22px;height:16px;border-left:1px solid var(--grid2);font-size:8px;color:#b0b0b0;padding-left:2px;}
+  .ghead .labelcol{position:sticky;left:0;z-index:7;background:#fff;border-right:1px solid var(--grid);display:flex;align-items:flex-end;padding:8px 12px;font-size:9.5px;letter-spacing:1px;color:var(--muted);}
+  .timehead{position:relative;height:40px;}
+  .tick{position:absolute;top:0;height:40px;border-left:1px solid var(--grid2);font-size:8.5px;color:#9a9a9a;padding:3px 0 0 3px;white-space:nowrap;}
+  .tick.major{border-left:1px solid var(--grid);color:var(--ink);font-weight:700;font-size:9px;}
 
   .grow{display:flex;position:relative;border-bottom:1px solid var(--grid2);}
-  .grow:hover{background:var(--grid2);}
-  .grow .labelcol{position:sticky;left:0;z-index:5;background:inherit;border-right:1px solid var(--grid);display:flex;align-items:center;padding:0 12px;font-size:10.5px;}
+  .grow .labelcol{position:sticky;left:0;z-index:5;background:#fff;border-right:1px solid var(--grid);display:flex;align-items:center;padding:0 12px;font-size:10px;}
+  .grow.alt .labelcol{background:var(--rowAlt);}
   .grow.alt{background:var(--rowAlt);}
-  .grow .track{position:relative;height:30px;flex:none;}
-
-  /* brand header row */
-  .brandrow{background:var(--red)!important;}
-  .brandrow .labelcol{background:var(--red);color:#fff;font-weight:700;letter-spacing:3px;font-size:12px;border-right:1px solid var(--red);}
+  .grow .track{position:relative;height:34px;flex:none;}
+  .brandrow .labelcol{background:var(--red);color:#fff;font-weight:700;letter-spacing:2px;font-size:11px;border-right:1px solid var(--red);}
   .brandrow .track{background:var(--red);}
-
-  .sublabel{color:var(--muted);}
   .chainlabel{color:var(--chain);font-weight:700;}
-  .indent{padding-left:24px!important;}
 
-  .bar{position:absolute;top:6px;height:18px;border-radius:5px;display:flex;align-items:center;padding:0 7px;color:#fff;font-size:9.5px;white-space:nowrap;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.12);}
-  .bar.soft{opacity:.92;}
-  .bar.chainbar{background:repeating-linear-gradient(45deg,var(--chain),var(--chain) 7px,#c80005 7px,#c80005 14px);font-weight:700;}
+  .pill{position:absolute;top:7px;height:20px;border-radius:5px;display:flex;align-items:center;color:#fff;font-size:9px;white-space:nowrap;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.14);cursor:grab;touch-action:none;user-select:none;}
+  .pill:active{cursor:grabbing;}
+  .pill.soft{opacity:.95;}
+  .pill.chainbar{background:repeating-linear-gradient(45deg,var(--chain),var(--chain) 7px,#c40005 7px,#c40005 14px);font-weight:700;}
+  .pilltext{padding:0 9px;pointer-events:none;overflow:hidden;text-overflow:ellipsis;}
+  .handle{position:absolute;top:0;height:100%;width:9px;cursor:ew-resize;touch-action:none;z-index:2;opacity:0;}
+  .handle.l{left:0;border-radius:5px 0 0 5px;}.handle.r{right:0;border-radius:0 5px 5px 0;}
+  .pill:hover .handle{opacity:1;background:rgba(255,255,255,.4);}
 
-  .milestone{position:absolute;top:2px;z-index:4;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%);}
-  .milestone .glyph{font-size:16px;line-height:1;}
-  .milestone .mlabel{font-size:8px;white-space:nowrap;margin-top:1px;background:#fff;border:1px solid var(--grid);border-radius:4px;padding:1px 4px;}
+  .mstone{position:absolute;top:1px;z-index:4;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%);cursor:grab;touch-action:none;user-select:none;}
+  .mstone:active{cursor:grabbing;}
+  .mstone .glyph{font-size:15px;line-height:1;}
+  .mstone .mlabel{font-size:7.5px;white-space:nowrap;margin-top:1px;background:#fff;border:1px solid var(--grid);border-radius:4px;padding:1px 4px;pointer-events:none;}
 
-  .todayline{position:absolute;top:0;bottom:0;width:2px;background:rgba(237,0,6,.55);z-index:3;}
-  .todayflag{position:absolute;top:0;transform:translateX(-50%);background:var(--red);color:#fff;font-size:8px;padding:1px 4px;border-radius:0 0 4px 4px;z-index:8;white-space:nowrap;}
-
-  .gridlines{position:absolute;top:0;bottom:0;left:0;right:0;pointer-events:none;}
+  .gridlines{position:absolute;inset:0;pointer-events:none;}
   .vline{position:absolute;top:0;bottom:0;width:1px;background:var(--grid2);}
-  .vline.month{background:var(--grid);}
+  .vline.major{background:var(--grid);}
+  .todayline{position:absolute;top:0;bottom:0;width:2px;background:rgba(237,0,6,.5);z-index:1;pointer-events:none;}
 
-  .note{font-size:11px;color:var(--muted);margin-top:18px;line-height:1.6;}
+  #readout{position:fixed;display:none;z-index:99;background:var(--ink);color:#fff;font-size:10px;padding:4px 8px;border-radius:6px;pointer-events:none;white-space:nowrap;}
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;padding:10px 18px;border-radius:10px;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none;}
+  #toast.show{opacity:1;}
+
+  .note{font-size:11px;color:var(--muted);margin-top:16px;line-height:1.6;}
   .note b{color:var(--ink);}
-  .foot{font-size:10px;color:#b0b0b0;margin-top:24px;letter-spacing:1px;}
+  .foot{font-size:10px;color:#b0b0b0;margin-top:20px;letter-spacing:1px;}
 </style>
 </head>
 <body>
 <div class="topbar">
   <h1>CURADOR &nbsp;×&nbsp; STUDIO LINEAR</h1>
-  <p>PROJECT TIMELINE — GANTT VIEW · RE-ANCHORED TO HEADCHANGE WORKSHOP JUN 24, 2026 (+4 WKS) · JUN 2026 → MAR 2027 · 3 BRANDS · INCL. COMPLIANCE → MANUFACTURING → PHOTO → WEB ASSET CHAIN</p>
+  <p>EDITABLE PROJECT TIMELINE · DRAG TO MOVE · DRAG EDGES TO RESIZE · JUN 2026 → MAR 2027 · 3 BRANDS + COMPLIANCE→MFG→PHOTO→LAUNCH CHAIN</p>
 </div>
 
 <div class="wrap">
+  <div class="toolbar">
+    <div class="hint"><b>Drag a pill</b> to move it · <b>drag its left/right edge</b> to stretch or shrink · milestones (✦ ◆ ★) drag too. Then hit <b>Save</b>.</div>
+    <span id="status">no changes</span>
+    <button class="btn ghost" id="relinkBtn" title="Re-snap each compliance→mfg→photo→launch chain to its packaging-design date">Re-link chains</button>
+    <button class="btn ghost" id="resetBtn">Reset</button>
+    <button class="btn primary" id="saveBtn">Save &amp; copy link</button>
+  </div>
 
   <div class="summary" id="summary"></div>
 
   <div class="legend">
     <div class="item"><span class="swatch" style="background:var(--strategy)"></span>Brand Strategy</div>
     <div class="item"><span class="swatch" style="background:var(--visual)"></span>Visual / Custom Branding</div>
-    <div class="item"><span class="swatch" style="background:var(--photo)"></span>Lifestyle Photography</div>
+    <div class="item"><span class="swatch" style="background:var(--photo)"></span>Photography</div>
     <div class="item"><span class="swatch" style="background:var(--website)"></span>Website (Studio Linear)</div>
     <div class="item"><span class="swatch" style="background:var(--packaging)"></span>Packaging Design</div>
-    <div class="item"><span class="swatch" style="background:var(--instore)"></span>In-Store Display</div>
-    <div class="item"><span class="swatch" style="background:var(--social)"></span>Social Media</div>
+    <div class="item"><span class="swatch" style="background:var(--instore)"></span>In-Store</div>
+    <div class="item"><span class="swatch" style="background:var(--social)"></span>Social</div>
     <div class="item"><span class="swatch" style="background:var(--bxd)"></span>Brand Expansion Deck</div>
-    <div class="item"><span style="color:var(--strategy);font-size:14px">✦</span>Strategy workshop</div>
-    <div class="item"><span class="swatch chain"></span><b>Real-world chain</b> (compliance / mfg / photoshoot / impl)</div>
-    <div class="item"><span style="color:var(--packaging);font-size:14px">▸</span>Packaging design approved</div>
-    <div class="item"><span class="dia">◆</span>Site live — 3D comps</div>
-    <div class="item"><span class="star">★</span>Full launch — REAL assets</div>
+    <div class="item"><span class="swatch chain"></span><b>Real-world chain</b></div>
+    <div class="item"><span style="color:var(--strategy);font-size:13px">✦</span>Workshop</div>
+    <div class="item"><span class="dia">◆</span>Site live · 3D comps</div>
+    <div class="item"><span class="star">★</span>Full launch · real assets</div>
   </div>
 
-  <div class="ganttScroll">
-    <div class="gantt" id="gantt"></div>
-  </div>
+  <div class="ganttScroll"><div class="gantt" id="gantt"></div></div>
 
   <div class="note">
-    <b>Re-anchored:</b> intake is complete and the Headchange strategy workshop (✦) is locked for <b>June 24, 2026</b>. The whole program has been slid <b>+4 weeks</b> from the original PDF, keeping the 3-brand stagger — so Safebet's workshop lands ~Jul 15 and Bubbles ~Aug 5.
-    <br><br>
-    <b>How to read this:</b> Studio Linear's deliverables are the pastel bars and follow the PDF week-by-week. The <b>PACKAGING → LAUNCH</b> row for each brand is one continuous track: it starts with <b>packaging design</b> (teal), and the moment that design is approved (<span style="color:var(--packaging);font-weight:700">▸</span>) the real-world chain flows directly out of it — <b>Compliance 60d → Manufacturing 30d → Photoshoot 3wk → Web implementation 2wk</b> — ending at <span class="star">★</span> <b>full launch</b>.
-    <br><br>
-    Because that chain runs ~125 days after design approval, every site goes live <b>before</b> real packaging photography exists. The <span class="dia">◆</span> on the Website row marks when Studio Linear hands over a launch-ready site (running on <b>3D comps</b>); the <span class="star">★</span> marks full launch with <b>real photographed assets</b> swapped in. The gap between ◆ and ★ is the 3D-comp window.
+    <b>How this works:</b> everything you see is a draggable pill. Move a bar or drag its edges to reshape any phase, then <b>Save &amp; copy link</b> — your layout is stored in this browser <i>and</i> baked into the page URL, which is copied to your clipboard. Send that URL to Cindy and she sees exactly your adjusted timeline (no re-publish needed). <b>Reset</b> restores the original plan. <b>Re-link chains</b> re-snaps each brand's compliance (60d) → manufacturing (30d) → photoshoot (3wk) → web-impl (2wk) → ★ launch sequence to wherever you dragged its packaging-design bar.
   </div>
-
-  <div class="foot">Generated for Sean / Curador · dates derived from "Curador Brands - Project Timeline (1).pdf"</div>
+  <div class="foot">Generated for Sean / Curador · re-anchored to Headchange workshop Jun 24, 2026</div>
 </div>
 
+<div id="readout"></div>
+<div id="toast"></div>
+
 <script>
-const T0 = new Date('2026-06-08T00:00:00');
-const T1 = new Date('2027-03-31T00:00:00');
-const PXDAY = 5.0;
-const LABELW = 230;
-const MS = 86400000;
+const MS=86400000;
+const T0=new Date(Date.UTC(2026,5,8));      // Jun 8 2026
+const T1=new Date(Date.UTC(2027,2,31));     // Mar 31 2027
+const PXDAY=6.0, LABELW=210;
+const totalDays=Math.round((T1-T0)/MS);
+const CHARTW=totalDays*PXDAY;
+const LSKEY='curador-gantt-v3';
 
-const dnum = d => Math.round((new Date(d) - T0)/MS);
-const x = d => dnum(d)*PXDAY;
-const addDays = (d,n)=>{const x=new Date(d); x.setDate(x.getDate()+n); return x.toISOString().slice(0,10);};
-const totalDays = dnum(T1);
-const CHARTW = totalDays*PXDAY;
+const dnum=s=>Math.round((Date.parse(s)-T0)/MS);
+const addDays=(s,n)=>new Date(Date.parse(s)+n*MS).toISOString().slice(0,10);
+const fmtDay=n=>new Date(T0.getTime()+n*MS).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'});
+const yearOf=n=>new Date(T0.getTime()+n*MS).getUTCFullYear();
 
-// fmt date e.g. Dec 17
-function fmt(d){const x=new Date(d);return x.toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'});}
+const C={strategy:'var(--strategy)',visual:'var(--visual)',photo:'var(--photo)',website:'var(--website)',packaging:'var(--packaging)',instore:'var(--instore)',social:'var(--social)',bxd:'var(--bxd)'};
 
-// ---- brand data ----
-const C = {strategy:'var(--strategy)',visual:'var(--visual)',photo:'var(--photo)',website:'var(--website)',packaging:'var(--packaging)',instore:'var(--instore)',social:'var(--social)',bxd:'var(--bxd)'};
-
-const brands = [
-  {
-    name:'HEADCHANGE',
-    workshop:'2026-05-27',
-    pkgDesignStart:'2026-07-20',
-    pkgDesignDone:'2026-08-14',
-    siteLive3D:'2026-09-11',
-    rows:[
-      {label:'Brand Strategy & Messaging',c:'strategy',bars:[['2026-05-18','2026-06-12','Intake → Workshop → Deliver → Finalize']]},
-      {label:'Visual Universe Expansion',c:'visual',bars:[['2026-06-15','2026-07-17','Moodboard → Creative → Deliverables']]},
-      {label:'Lifestyle Photography',c:'photo',bars:[['2026-06-15','2026-07-31','Shot list → Pre-pro → Shoot → Delivery']]},
-      {label:'Website (Studio Linear)',c:'website',bars:[['2026-07-20','2026-09-11','Figma → Dev → Launch-ready']],live:true},
-      {label:'Social Media',c:'social',bars:[['2026-08-03','2026-09-25','Strategy → Content → Publish'],['2026-10-26','2026-10-30','Final report']]},
-      {label:'In-Store Display',c:'instore',bars:[['2026-08-17','2026-09-11','Design → Revisions → Deliverables']]},
-      {label:'Brand Expansion Deck',c:'bxd',bars:[['2026-10-05','2026-10-23','Build → Visuals → Finalize']]},
-    ]
-  },
-  {
-    name:'SAFEBET',
-    workshop:'2026-06-17',
-    pkgDesignStart:'2026-08-17',
-    pkgDesignDone:'2026-09-11',
-    siteLive3D:'2026-10-16',
-    rows:[
-      {label:'Brand Strategy & Messaging',c:'strategy',bars:[['2026-06-08','2026-07-03','Intake → Workshop → Deliver → Finalize']]},
-      {label:'Custom Branding',c:'visual',bars:[['2026-07-13','2026-08-14','Moodboard → Concepts → Deliverables']]},
-      {label:'Lifestyle Photography',c:'photo',bars:[['2026-08-03','2026-09-18','Shot list → Pre-pro → Shoot → Delivery']]},
-      {label:'Website (Studio Linear)',c:'website',bars:[['2026-08-17','2026-10-16','Figma → Dev → Test → Launch-ready']],live:true},
-      {label:'In-Store Display',c:'instore',bars:[['2026-09-14','2026-10-02','Design → Revisions → Finalize']]},
-      {label:'Social Media',c:'social',bars:[['2026-08-31','2026-11-27','Strategy → Content → Publish → Report'],['2027-01-04','2027-01-29','Month 2 cycle']]},
-      {label:'Brand Expansion Deck',c:'bxd',bars:[['2026-10-19','2026-11-06','Build → Visuals → Finalize']]},
-    ]
-  },
-  {
-    name:'BUBBLES',
-    workshop:'2026-07-08',
-    pkgDesignStart:'2026-09-14',
-    pkgDesignDone:'2026-10-02',
-    siteLive3D:'2026-11-13',
-    rows:[
-      {label:'Brand Strategy & Messaging',c:'strategy',bars:[['2026-06-29','2026-07-24','Intake → Workshop → Deliver → Finalize']]},
-      {label:'Visual Universe Expansion',c:'visual',bars:[['2026-08-10','2026-09-11','Moodboard → Creative → Deliverables']]},
-      {label:'Website (Studio Linear)',c:'website',bars:[['2026-09-14','2026-11-13','Figma → Dev → Test → Launch-ready']],live:true},
-      {label:'In-Store Display',c:'instore',bars:[['2026-10-05','2026-10-16','Finalize → Deliverables']]},
-      {label:'Brand Expansion Deck',c:'bxd',bars:[['2026-10-26','2026-11-13','Build → Visuals → Finalize']]},
-      {label:'Social Media',c:'social',bars:[['2026-11-30','2027-01-01','Strategy → Content → Publish'],['2027-02-01','2027-02-26','Month 2 cycle']]},
-    ]
-  }
+// ---- source data (original PDF dates) ----
+const brands=[
+  {name:'HEADCHANGE',workshop:'2026-05-27',pkgDesignStart:'2026-07-20',pkgDesignDone:'2026-08-14',siteLive3D:'2026-09-11',rows:[
+    {label:'Brand Strategy & Messaging',c:'strategy',bars:[['2026-05-18','2026-06-12','Intake → Workshop → Deliver → Finalize']]},
+    {label:'Visual Universe Expansion',c:'visual',bars:[['2026-06-15','2026-07-17','Moodboard → Creative → Deliverables']]},
+    {label:'Lifestyle Photography',c:'photo',bars:[['2026-06-15','2026-07-31','Shot list → Pre-pro → Shoot → Delivery']]},
+    {label:'Website (Studio Linear)',c:'website',bars:[['2026-07-20','2026-09-11','Figma → Dev → Launch-ready']],live:true},
+    {label:'Social Media',c:'social',bars:[['2026-08-03','2026-09-25','Strategy → Content → Publish'],['2026-10-26','2026-10-30','Final report']]},
+    {label:'In-Store Display',c:'instore',bars:[['2026-08-17','2026-09-11','Design → Revisions → Deliverables']]},
+    {label:'Brand Expansion Deck',c:'bxd',bars:[['2026-10-05','2026-10-23','Build → Visuals → Finalize']]},
+  ]},
+  {name:'SAFEBET',workshop:'2026-06-17',pkgDesignStart:'2026-08-17',pkgDesignDone:'2026-09-11',siteLive3D:'2026-10-16',rows:[
+    {label:'Brand Strategy & Messaging',c:'strategy',bars:[['2026-06-08','2026-07-03','Intake → Workshop → Deliver → Finalize']]},
+    {label:'Custom Branding',c:'visual',bars:[['2026-07-13','2026-08-14','Moodboard → Concepts → Deliverables']]},
+    {label:'Lifestyle Photography',c:'photo',bars:[['2026-08-03','2026-09-18','Shot list → Pre-pro → Shoot → Delivery']]},
+    {label:'Website (Studio Linear)',c:'website',bars:[['2026-08-17','2026-10-16','Figma → Dev → Test → Launch-ready']],live:true},
+    {label:'In-Store Display',c:'instore',bars:[['2026-09-14','2026-10-02','Design → Revisions → Finalize']]},
+    {label:'Social Media',c:'social',bars:[['2026-08-31','2026-11-27','Strategy → Content → Publish → Report'],['2027-01-04','2027-01-29','Month 2 cycle']]},
+    {label:'Brand Expansion Deck',c:'bxd',bars:[['2026-10-19','2026-11-06','Build → Visuals → Finalize']]},
+  ]},
+  {name:'BUBBLES',workshop:'2026-07-08',pkgDesignStart:'2026-09-14',pkgDesignDone:'2026-10-02',siteLive3D:'2026-11-13',rows:[
+    {label:'Brand Strategy & Messaging',c:'strategy',bars:[['2026-06-29','2026-07-24','Intake → Workshop → Deliver → Finalize']]},
+    {label:'Visual Universe Expansion',c:'visual',bars:[['2026-08-10','2026-09-11','Moodboard → Creative → Deliverables']]},
+    {label:'Website (Studio Linear)',c:'website',bars:[['2026-09-14','2026-11-13','Figma → Dev → Test → Launch-ready']],live:true},
+    {label:'In-Store Display',c:'instore',bars:[['2026-10-05','2026-10-16','Finalize → Deliverables']]},
+    {label:'Brand Expansion Deck',c:'bxd',bars:[['2026-10-26','2026-11-13','Build → Visuals → Finalize']]},
+    {label:'Social Media',c:'social',bars:[['2026-11-30','2027-01-01','Strategy → Content → Publish'],['2027-02-01','2027-02-26','Month 2 cycle']]},
+  ]},
 ];
-
-// ---- re-anchor: Headchange workshop moved to June 24, 2026 (intake already done).
-// Slide the entire program +4 weeks (28d), preserving the 3-brand stagger.
-const SHIFT = 28;
+// re-anchor: Headchange workshop → Jun 24 2026, slide whole program +4 weeks
+const SHIFT=28;
 brands.forEach(b=>{
-  if(b.workshop) b.workshop=addDays(b.workshop,SHIFT);
-  b.pkgDesignStart=addDays(b.pkgDesignStart,SHIFT);
-  b.pkgDesignDone=addDays(b.pkgDesignDone,SHIFT);
-  b.siteLive3D=addDays(b.siteLive3D,SHIFT);
-  b.rows.forEach(rw=> rw.bars.forEach(bn=>{ bn[0]=addDays(bn[0],SHIFT); bn[1]=addDays(bn[1],SHIFT); }));
+  b.workshop=addDays(b.workshop,SHIFT);b.pkgDesignStart=addDays(b.pkgDesignStart,SHIFT);
+  b.pkgDesignDone=addDays(b.pkgDesignDone,SHIFT);b.siteLive3D=addDays(b.siteLive3D,SHIFT);
+  b.rows.forEach(rw=>rw.bars.forEach(bn=>{bn[0]=addDays(bn[0],SHIFT);bn[1]=addDays(bn[1],SHIFT);}));
 });
-
-// compute chain per brand
 function chain(pkgDone){
-  const cStart=pkgDone;                 const cEnd=addDays(cStart,60);
-  const mStart=cEnd;                    const mEnd=addDays(mStart,30);
-  const pStart=mEnd;                    const pEnd=addDays(pStart,21);
-  const wStart=pEnd;                    const wEnd=addDays(wStart,14);
-  return {
-    compliance:[cStart,cEnd], manufacturing:[mStart,mEnd],
-    photo:[pStart,pEnd], impl:[wStart,wEnd], realDone:wEnd
-  };
+  const c=[pkgDone,addDays(pkgDone,60)],m=[c[1],addDays(c[1],30)],p=[m[1],addDays(m[1],21)],w=[p[1],addDays(p[1],14)];
+  return {compliance:c,manufacturing:m,photo:p,impl:w,realDone:w[1]};
 }
 
-// ---- build summary cards ----
-const sum = document.getElementById('summary');
+// ---- build flat item model ----
+const prefixOf={HEADCHANGE:'HC',SAFEBET:'SB',BUBBLES:'BB'};
+const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+const rowsModel=[],allItems=[],brandRefs={};
 brands.forEach(b=>{
-  const ch=chain(b.pkgDesignDone);
-  const el=document.createElement('div');
-  el.className='card';
-  el.innerHTML=`<h3>${b.name}</h3>
-    <div class="line"><span>Strategy workshop</span><span>${fmt(b.workshop)} '26</span></div>
-    <div class="line"><span>Packaging design approved</span><span>${fmt(b.pkgDesignDone)} '26</span></div>
-    <div class="line"><span>+60d compliance</span><span>${fmt(ch.compliance[1])}</span></div>
-    <div class="line"><span>+30d manufacturing</span><span>${fmt(ch.manufacturing[1])}</span></div>
-    <div class="line"><span>+3wk pkg photography</span><span>${fmt(ch.photo[1])}</span></div>
-    <div class="line"><span>+2wk web implementation</span><span>${fmt(ch.impl[1])}</span></div>
-    <div class="line"><span>◆ Site live (3D comps)</span><span>${fmt(b.siteLive3D)}</span></div>
-    <div class="line"><span class="real">★ Site complete — REAL</span><span class="real">${fmt(ch.realDone)} ${new Date(ch.realDone).getUTCFullYear()}</span></div>`;
-  sum.appendChild(el);
-});
-
-// ---- build gantt ----
-const g=document.getElementById('gantt');
-g.style.width=(LABELW+CHARTW)+'px';
-
-// header
-const head=document.createElement('div'); head.className='ghead';
-const hl=document.createElement('div'); hl.className='labelcol'; hl.textContent='WORKSTREAM';
-const th=document.createElement('div'); th.className='timehead'; th.style.width=CHARTW+'px'; th.style.height='38px';
-// months
-let cur=new Date(T0);
-cur.setUTCDate(1);
-while(cur<T1){
-  const ms=new Date(Math.max(cur,T0));
-  const m=document.createElement('div'); m.className='month';
-  m.style.left=x(ms.toISOString().slice(0,10))+'px';
-  m.textContent=cur.toLocaleDateString('en-US',{month:'short',year:'2-digit',timeZone:'UTC'}).toUpperCase();
-  th.appendChild(m);
-  cur.setUTCMonth(cur.getUTCMonth()+1);
-}
-// weekly ticks (Mondays)
-let wk=new Date(T0);
-while(wk<T1){
-  const t=document.createElement('div'); t.className='wtick';
-  t.style.left=x(wk.toISOString().slice(0,10))+'px';
-  wk.setUTCDate(wk.getUTCDate()+7);
-}
-head.appendChild(hl); head.appendChild(th); g.appendChild(head);
-
-function gridlines(){
-  const gl=document.createElement('div'); gl.className='gridlines';
-  let c=new Date(T0); c.setUTCDate(1);
-  while(c<T1){
-    const v=document.createElement('div'); v.className='vline month';
-    v.style.left=x(c.toISOString().slice(0,10))+'px'; gl.appendChild(v);
-    c.setUTCMonth(c.getUTCMonth()+1);
-  }
-  return gl;
-}
-
-function row(labelHtml,opts={}){
-  const r=document.createElement('div'); r.className='grow'+(opts.alt?' alt':'');
-  if(opts.brand) r.className='grow brandrow';
-  const l=document.createElement('div'); l.className='labelcol'+(opts.indent?' indent':'');
-  l.innerHTML=labelHtml;
-  const t=document.createElement('div'); t.className='track'; t.style.width=CHARTW+'px';
-  if(!opts.brand) t.appendChild(gridlines());
-  r.appendChild(l); r.appendChild(t);
-  g.appendChild(r);
-  return t;
-}
-
-function bar(track,start,end,color,text,extraClass=''){
-  const b=document.createElement('div'); b.className='bar '+extraClass;
-  const left=x(start), w=Math.max(x(end)-x(start),6);
-  b.style.left=left+'px'; b.style.width=w+'px';
-  if(color) b.style.background=color;
-  b.title=`${text} (${fmt(start)} – ${fmt(end)})`;
-  b.textContent=text;
-  track.appendChild(b);
-  return b;
-}
-
-function milestone(track,date,glyph,color,label){
-  const m=document.createElement('div'); m.className='milestone';
-  m.style.left=x(date)+'px';
-  m.innerHTML=`<div class="glyph" style="color:${color}">${glyph}</div><div class="mlabel">${label}</div>`;
-  track.appendChild(m);
-}
-
-brands.forEach(b=>{
-  row(b.name,{brand:true});
-  const ch=chain(b.pkgDesignDone);
-  let i=0;
+  const px=prefixOf[b.name],ref=brandRefs[px]={name:b.name};
+  rowsModel.push({brandHeader:true,name:b.name});
   b.rows.forEach(rw=>{
-    const t=row('<span>'+rw.label+'</span>',{alt:(i++%2===1)});
-    rw.bars.forEach(bn=> bar(t,bn[0],bn[1],C[rw.c],bn[2],'soft'));
-    if(rw.c==='strategy'&&b.workshop) milestone(t,b.workshop,'✦','var(--strategy)','workshop '+fmt(b.workshop));
-    if(rw.live) milestone(t,b.siteLive3D,'◆','#e8821e','live · 3D comps');
+    const items=[];
+    rw.bars.forEach((bn,idx)=>{
+      const it={id:`${px}:${slug(rw.label)}:${idx}`,type:'bar',s:dnum(bn[0]),e:dnum(bn[1]),color:C[rw.c],text:bn[2],cls:'soft'};
+      items.push(it);allItems.push(it);
+    });
+    if(rw.c==='strategy'&&b.workshop){const it={id:`${px}:workshop`,type:'ms',d:dnum(b.workshop),color:'var(--strategy)',glyph:'✦',mlabel:'workshop'};items.push(it);allItems.push(it);ref.workshopMs=it;}
+    if(rw.live){const it={id:`${px}:live`,type:'ms',d:dnum(b.siteLive3D),color:'#e8821e',glyph:'◆',mlabel:'live · 3D comps'};items.push(it);allItems.push(it);ref.liveMs=it;}
+    rowsModel.push({label:rw.label,items});
   });
-  // Packaging → Launch : one continuous connected track
-  const seq=row('<span class="chainlabel">PACKAGING → LAUNCH</span>',{alt:(i++%2===1)});
-  // 1) packaging design (anchor)
-  bar(seq,b.pkgDesignStart,b.pkgDesignDone,C.packaging,'Pkg Design','soft');
-  // 2) real-world chain, each segment flowing directly from the previous
-  bar(seq,ch.compliance[0],ch.compliance[1],null,'Compliance · 60d','chainbar');
-  bar(seq,ch.manufacturing[0],ch.manufacturing[1],null,'Mfg · 30d','chainbar');
-  bar(seq,ch.photo[0],ch.photo[1],null,'Photoshoot · 3wk','chainbar');
-  bar(seq,ch.impl[0],ch.impl[1],null,'Web impl · 2wk','chainbar');
-  // 3) design-complete handoff marker + full launch
-  milestone(seq,b.pkgDesignDone,'▸','var(--packaging)','design approved');
-  milestone(seq,ch.realDone,'★','var(--chain)','FULL LAUNCH · real assets');
+  const ch=chain(b.pkgDesignDone),items=[];
+  const mk=(id,a,b2,text,cls,color)=>{const it={id:`${px}:${id}`,type:'bar',s:dnum(a),e:dnum(b2),text,cls,color};items.push(it);allItems.push(it);return it;};
+  ref.pkgBar=mk('pkgdesign',b.pkgDesignStart,b.pkgDesignDone,'Pkg Design','soft',C.packaging);
+  ref.compBar=mk('comp',ch.compliance[0],ch.compliance[1],'Compliance · 60d','chainbar','');
+  ref.mfgBar=mk('mfg',ch.manufacturing[0],ch.manufacturing[1],'Mfg · 30d','chainbar','');
+  ref.photoBar=mk('pho',ch.photo[0],ch.photo[1],'Photoshoot · 3wk','chainbar','');
+  ref.implBar=mk('impl',ch.impl[0],ch.impl[1],'Web impl · 2wk','chainbar','');
+  const launch={id:`${px}:launch`,type:'ms',d:dnum(ch.realDone),color:'var(--chain)',glyph:'★',mlabel:'FULL LAUNCH'};items.push(launch);allItems.push(launch);ref.launchMs=launch;
+  rowsModel.push({label:'PACKAGING → LAUNCH',chain:true,items});
 });
 
-// today line + flags across full chart height
-const today='2026-06-09';
-function overlayToday(){
-  document.querySelectorAll('.grow .track').forEach(t=>{
-    const l=document.createElement('div'); l.className='todayline'; l.style.left=x(today)+'px';
-    t.appendChild(l);
+// ---- state load ----
+function applyState(st){if(!st)return;allItems.forEach(it=>{if(it.type==='bar'&&st.b&&st.b[it.id]){it.s=st.b[it.id][0];it.e=st.b[it.id][1];}else if(it.type==='ms'&&st.m&&st.m[it.id]!=null){it.d=st.m[it.id];}});}
+(function loadState(){
+  let st=null;
+  if(location.hash.startsWith('#s=')){try{st=JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(3)))));}catch(e){}}
+  if(!st){const ls=localStorage.getItem(LSKEY);if(ls){try{st=JSON.parse(ls);}catch(e){}}}
+  applyState(st);
+})();
+
+// ---- ticks (1 / 15 / end-of-month) ----
+const ticks=[];
+(function(){let y=2026,mo=5;while(true){const first=Date.UTC(y,mo,1);if(first>T1.getTime())break;
+  const last=new Date(Date.UTC(y,mo+1,0)).getUTCDate();
+  [[1,true],[15,false],[last,false]].forEach(([day,major])=>{const t=Date.UTC(y,mo,day);if(t<T0.getTime()||t>T1.getTime())return;
+    const n=(t-T0.getTime())/MS;const mon=new Date(t).toLocaleDateString('en-US',{month:'short',timeZone:'UTC'}).toUpperCase();
+    ticks.push({n,major,label:major?mon:String(day)});});
+  mo++;if(mo>11){mo=0;y++;}}
+})();
+const todayN=dnum('2026-06-09');
+
+// ---- render ----
+const g=document.getElementById('gantt');g.style.width=(LABELW+CHARTW)+'px';
+const head=document.createElement('div');head.className='ghead';
+const hl=document.createElement('div');hl.className='labelcol';hl.textContent='WORKSTREAM';
+const th=document.createElement('div');th.className='timehead';th.style.width=CHARTW+'px';
+ticks.forEach(t=>{const el=document.createElement('div');el.className='tick'+(t.major?' major':'');el.style.left=(t.n*PXDAY)+'px';el.textContent=t.label;th.appendChild(el);});
+head.appendChild(hl);head.appendChild(th);g.appendChild(head);
+
+function gridlines(){const gl=document.createElement('div');gl.className='gridlines';
+  ticks.forEach(t=>{const v=document.createElement('div');v.className='vline'+(t.major?' major':'');v.style.left=(t.n*PXDAY)+'px';gl.appendChild(v);});
+  const tl=document.createElement('div');tl.className='todayline';tl.style.left=(todayN*PXDAY)+'px';gl.appendChild(tl);
+  return gl;}
+
+let alt=false;
+rowsModel.forEach(rm=>{
+  const r=document.createElement('div');r.className='grow'+(rm.brandHeader?' brandrow':(alt?' alt':''));
+  if(!rm.brandHeader)alt=!alt; else alt=false;
+  const l=document.createElement('div');l.className='labelcol';
+  l.innerHTML=rm.brandHeader?rm.name:(rm.chain?'<span class="chainlabel">'+rm.label+'</span>':'<span>'+rm.label+'</span>');
+  const t=document.createElement('div');t.className='track';t.style.width=CHARTW+'px';
+  if(!rm.brandHeader){t.appendChild(gridlines());(rm.items||[]).forEach(it=>it.type==='bar'?renderBar(t,it):renderMs(t,it));}
+  r.appendChild(l);r.appendChild(t);g.appendChild(r);
+});
+
+function renderBar(track,it){
+  const el=document.createElement('div');el.className='pill '+(it.cls||'');if(it.color)el.style.background=it.color;
+  const lh=document.createElement('div');lh.className='handle l';
+  const rh=document.createElement('div');rh.className='handle r';
+  const tx=document.createElement('span');tx.className='pilltext';tx.textContent=it.text;
+  el.appendChild(lh);el.appendChild(tx);el.appendChild(rh);track.appendChild(el);
+  it.el=el;layoutItem(it);drag(el,it,'move');drag(lh,it,'l');drag(rh,it,'r');
+}
+function renderMs(track,it){
+  const el=document.createElement('div');el.className='mstone';
+  el.innerHTML=`<div class="glyph" style="color:${it.color}">${it.glyph}</div><div class="mlabel">${it.mlabel}</div>`;
+  track.appendChild(el);it.el=el;layoutItem(it);drag(el,it,'ms');
+}
+function layoutItem(it){
+  if(it.type==='bar'){it.el.style.left=(it.s*PXDAY)+'px';it.el.style.width=Math.max((it.e-it.s)*PXDAY,10)+'px';it.el.title=`${it.text}: ${fmtDay(it.s)} – ${fmtDay(it.e)}`;}
+  else{it.el.style.left=(it.d*PXDAY)+'px';it.el.title=`${it.mlabel}: ${fmtDay(it.d)}`;}
+}
+
+const readout=document.getElementById('readout');
+function drag(el,it,mode){
+  el.addEventListener('pointerdown',e=>{
+    e.preventDefault();e.stopPropagation();el.setPointerCapture(e.pointerId);
+    const x0=e.clientX,s0=it.s,e0=it.e,d0=it.d;
+    function mv(ev){
+      const dd=Math.round((ev.clientX-x0)/PXDAY);
+      if(mode==='move'){const w=e0-s0;let ns=Math.max(0,Math.min(s0+dd,totalDays-w));it.s=ns;it.e=ns+w;}
+      else if(mode==='l'){it.s=Math.max(0,Math.min(s0+dd,it.e-1));}
+      else if(mode==='r'){it.e=Math.min(totalDays,Math.max(e0+dd,it.s+1));}
+      else if(mode==='ms'){it.d=Math.max(0,Math.min(d0+dd,totalDays));}
+      layoutItem(it);
+      readout.style.display='block';readout.style.left=(ev.clientX+14)+'px';readout.style.top=(ev.clientY+16)+'px';
+      readout.textContent=it.type==='bar'?`${fmtDay(it.s)} – ${fmtDay(it.e)}  (${it.e-it.s}d)`:fmtDay(it.d);
+    }
+    function up(){document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);readout.style.display='none';markDirty();updateSummary();}
+    document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);
   });
 }
-overlayToday();
+
+// ---- summary ----
+const sum=document.getElementById('summary');
+function updateSummary(){
+  sum.innerHTML='';
+  Object.values(brandRefs).forEach(b=>{
+    const el=document.createElement('div');el.className='card';
+    el.innerHTML=`<h3>${b.name}</h3>
+      <div class="line"><span>Strategy workshop</span><span>${fmtDay(b.workshopMs.d)} '${String(yearOf(b.workshopMs.d)).slice(2)}</span></div>
+      <div class="line"><span>Packaging approved</span><span>${fmtDay(b.pkgBar.e)}</span></div>
+      <div class="line"><span>+ compliance</span><span>${fmtDay(b.compBar.e)}</span></div>
+      <div class="line"><span>+ manufacturing</span><span>${fmtDay(b.mfgBar.e)}</span></div>
+      <div class="line"><span>+ photoshoot</span><span>${fmtDay(b.photoBar.e)}</span></div>
+      <div class="line"><span>◆ Site live (3D comps)</span><span>${fmtDay(b.liveMs.d)}</span></div>
+      <div class="line"><span class="real">★ Full launch (real)</span><span class="real">${fmtDay(b.launchMs.d)} '${String(yearOf(b.launchMs.d)).slice(2)}</span></div>`;
+    sum.appendChild(el);
+  });
+}
+updateSummary();
+
+// ---- toolbar / save ----
+const statusEl=document.getElementById('status');
+let clean=!location.hash.startsWith('#s=');
+function markDirty(){clean=false;statusEl.textContent='unsaved changes';statusEl.className='unsaved';}
+function markClean(msg){clean=true;statusEl.textContent=msg||'saved';statusEl.className='';}
+if(!clean)statusEl.textContent='loaded from link';
+function currentState(){const s={b:{},m:{}};allItems.forEach(it=>{if(it.type==='bar')s.b[it.id]=[it.s,it.e];else s.m[it.id]=it.d;});return s;}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.className='show';setTimeout(()=>t.className='',2200);}
+document.getElementById('saveBtn').addEventListener('click',()=>{
+  const st=currentState();localStorage.setItem(LSKEY,JSON.stringify(st));
+  const enc=btoa(unescape(encodeURIComponent(JSON.stringify(st))));
+  history.replaceState(null,'','#s='+enc);
+  if(navigator.clipboard){navigator.clipboard.writeText(location.href).then(()=>toast('Saved — shareable link copied to clipboard')).catch(()=>toast('Saved (copy the URL to share)'));}
+  else toast('Saved (copy the URL to share)');
+  markClean('saved ✓');
+});
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  if(!confirm('Reset to the original timeline? This clears your saved edits.'))return;
+  localStorage.removeItem(LSKEY);history.replaceState(null,'',location.pathname);location.reload();
+});
+document.getElementById('relinkBtn').addEventListener('click',()=>{
+  Object.values(brandRefs).forEach(b=>{
+    const base=b.pkgBar.e;
+    b.compBar.s=base;b.compBar.e=base+60;
+    b.mfgBar.s=b.compBar.e;b.mfgBar.e=b.mfgBar.s+30;
+    b.photoBar.s=b.mfgBar.e;b.photoBar.e=b.photoBar.s+21;
+    b.implBar.s=b.photoBar.e;b.implBar.e=b.implBar.s+14;
+    b.launchMs.d=b.implBar.e;
+    [b.compBar,b.mfgBar,b.photoBar,b.implBar,b.launchMs].forEach(layoutItem);
+  });
+  markDirty();updateSummary();toast('Chains re-linked to packaging dates');
+});
 </script>
 </body>
 </html>
